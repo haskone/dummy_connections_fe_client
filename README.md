@@ -1,6 +1,12 @@
 # connections_fe
 
-TODO: add some desc and a gif
+Client for [this API BE](https://github.com/haskone/dummy_connections_be) that does the following:
+
+Person:
+![](person_demo.gif)
+
+Connection:
+![](connection_demo.gif)
 
 ## Project setup
 ```
