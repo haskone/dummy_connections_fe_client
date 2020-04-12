@@ -9,12 +9,9 @@ import {
   updateConnectionType
 } from '../api'
 
-Vue.use(Vuex)
+import { sortByCreated } from '../utils'
 
-// TODO: should be in some 'utils'
-const sortByCreated = (a, b) =>
-  (a.created_at > b.created_at) ? 1 :
-  (b.created_at > a.created_at ? -1 : 0)
+Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {

@@ -8,6 +8,12 @@ Person:
 Connection:
 ![](connection_demo.gif)
 
+## Tech
+
+- Vue, Vuex
+- Buefy
+- moment, axios
+
 ## Project setup
 ```
 npm install
