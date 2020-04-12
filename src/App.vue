@@ -1,19 +1,44 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <section>
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Persons & Connections</h1>
+          <h2 class="subtitle">Simple UI for Persons and their Connections</h2>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="notification">
+        <b-tabs v-model="activeTab">
+          <b-tab-item label="Person">
+            <Persons/>
+          </b-tab-item>
+          <b-tab-item label="Connections">
+            <Connections/>
+          </b-tab-item>
+        </b-tabs>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Persons from "./components/Persons";
+import Connections from "./components/Connections";
 
 export default {
-  name: 'App',
   components: {
-    HelloWorld
+    Persons,
+    Connections
+  },
+  data() {
+    return {
+      activeTab: 0,
+    };
   }
-}
+};
 </script>
 
 <style>
