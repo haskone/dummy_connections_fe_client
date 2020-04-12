@@ -1,4 +1,4 @@
-# connections_fe
+# Demo client for one demo flask API
 
 Client for [this API BE](https://github.com/haskone/dummy_connections_be) that does the following:
 
