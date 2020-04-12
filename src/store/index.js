@@ -41,41 +41,44 @@ const store = new Vuex.Store({
       ].sort(sortByCreated)
     },
     updateConnection(state, data) {
-      const { id, connectionType } = data
+      const { id, connection_type } = data
       state.connections = [
         ...state.connections.filter(i => i.id != id),
-        ...{
+        {
           ...state.connections.find(i => i.id = id),
-          connection_type: connectionType
+          connection_type: connection_type
         }
       ].sort(sortByCreated)
     },
+  },
+  getters: {
+    personEmails: state => state.persons.map(p => p.email)
   },
   actions: {
     async loadPersons({ commit }) {
       // TODO: check code
       const response = await getPersons()
-      commit("setPersons", response.data)
+      commit('setPersons', response.data)
     },
     async loadConnections({ commit }) {
       // TODO: check code
       const response = await getConnections()
-      commit("setConnections", response.data)
+      commit('setConnections', response.data)
     },
     async addPerson({ commit }, data) {
       const response = await postPerson(data)
-      commit("addPerson", response.data)
+      commit('addPerson', response.data)
     },
     async addConnection({ commit }, data) {
       const response = await postConnection(data)
-      commit("addConnection", response.data)
+      commit('addConnection', response.data)
     },
     async updateConnectionType({ commit }, data) {
       const { id, connectionType } = data
       const response = await updateConnectionType(id, {
         connection_type: connectionType
       })
-      commit("addConnection", response.data)
+      commit('updateConnection', response.data)
     },
   }
 })

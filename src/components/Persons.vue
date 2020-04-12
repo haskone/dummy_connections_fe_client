@@ -34,12 +34,36 @@
     >
       Add
     </b-button>
+    <b-button
+      class="space-around"
+      type="is-danger"
+      outlined
+      @click="reset"
+    >
+      Clear
+    </b-button>
 
     <b-table
       v-if="persons.length > 0"
       :data="persons"
-      :columns="columns"
     >
+      <template slot-scope="props">
+        <b-table-column field="first_name" label="First Name">
+          {{ props.row.first_name }}
+        </b-table-column>
+        <b-table-column field="last_name" label="Last Name">
+          {{ props.row.last_name }}
+        </b-table-column>
+        <b-table-column field="email" label="Email">
+          {{ props.row.email }}
+        </b-table-column>
+        <b-table-column field="updated_at" label="Updated At">
+          {{ format(props.row.updated_at) }}
+        </b-table-column>
+        <b-table-column field="created_at" label="Created At">
+          {{ format(props.row.created_at) }}
+        </b-table-column>
+      </template>
     </b-table>
     <b-message
       v-if="persons.length == 0"
@@ -51,67 +75,50 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from 'vuex';
+
+import { formatDatetime } from '../utils'
+import { INVALID_INPUT_MESSAGE, NON_UNIQUE_EMAIL_MESSAGE } from '../constants'
 
 export default {
   data() {
     return {
       newPerson: {
-        first_name: "",
-        last_name: "",
-        email: ""
-      },
-      columns: [
-        {
-          field: "first_name",
-          label: "First Name"
-        },
-        {
-          field: "last_name",
-          label: "Last Name"
-        },
-        {
-          field: "email",
-          label: "Email"
-        },
-        {
-          field: "created_at",
-          label: "Created At"
-        },
-        {
-          field: "updated_at",
-          label: "Updated At"
-        }
-      ]
+        first_name: '',
+        last_name: '',
+        email: ''
+      }
     };
   },
-  computed: mapState({
-    persons: "persons"
-  }),
+  computed: {
+    ...mapState(['persons']),
+    ...mapGetters(['personEmails'])
+  },
   mounted() {
     this.$nextTick(() => {
       this.loadPersons()
     })
   },
   methods: {
-    ...mapActions(["loadPersons", "addPerson"]),
-    // Yeah-yeah, DRY, right?
+    ...mapActions(['loadPersons', 'addPerson']),
+    format(strDate) {
+      return formatDatetime(strDate)
+    },
     success() {
       this.$buefy.toast.open({
-        message: "Sucessfully added!",
-        type: "is-success"
+        message: 'Sucessfully added!',
+        type: 'is-success'
       });
     },
-    validationError() {
+    validationError(message) {
       this.$buefy.toast.open({
         duration: 3000,
-        message: `Please, make sure all fields are filled (correctly)`,
-        position: "is-bottom",
-        type: "is-danger"
+        message: message,
+        position: 'is-bottom',
+        type: 'is-danger'
       });
     },
     isValid() {
-      // TODO: not really match BE rules
       return (
         this.newPerson.first_name != '' &&
         this.newPerson.last_name != '' &&
@@ -119,13 +126,21 @@ export default {
         this.$refs.emailInput.isValid
       )
     },
+    isDuplicatedEmail() {
+      return this.personEmails.includes(this.newPerson.email)
+    },
     add() {
-      if (this.isValid()) {
+      if (!this.isValid()) {
+        this.validationError(INVALID_INPUT_MESSAGE)
+      } else if (this.isDuplicatedEmail()) {
+        this.validationError(NON_UNIQUE_EMAIL_MESSAGE)
+      } else {
         this.success()
         this.addPerson(this.newPerson)
-      } else {
-        this.validationError()
       }
+    },
+    reset() {
+      this.newPerson = {}
     }
   }
 };

@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import Persons from "./components/Persons";
-import Connections from "./components/Connections";
+import Persons from './components/Persons';
+import Connections from './components/Connections';
 
 export default {
   components: {

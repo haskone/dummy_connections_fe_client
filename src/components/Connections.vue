@@ -2,6 +2,7 @@
   <section>
     <b-field label="From Person">
       <b-select
+        :disabled="isEditing"
         placeholder="Select by name"
         v-model="connection.from_person_id"
       >
@@ -15,6 +16,7 @@
 
     <b-field label="To Person">
       <b-select
+        :disabled="isEditing"
         placeholder="Select by name"
         v-model="connection.to_person_id"
       >
@@ -70,9 +72,29 @@
     <b-table
       v-if="connections.length > 0"
       :data="connections"
-      :columns="columns"
       :selected.sync="selectedConnection"
-    ></b-table>
+    >
+      <template slot-scope="props">
+        <b-table-column field="connection_type" label="Connection Type">
+          {{ props.row.connection_type }}
+        </b-table-column>
+        <b-table-column field="from_person_id" label="From">
+          {{ persons.find(p => p.id == props.row.from_person_id).first_name }}
+        </b-table-column>
+        <b-table-column field="to_person_id" label="To">
+          {{ persons.find(p => p.id == props.row.to_person_id).first_name }}
+        </b-table-column>
+        <b-table-column field="email" label="Email">
+          {{ props.row.email }}
+        </b-table-column>
+        <b-table-column field="updated_at" label="Updated At">
+          {{ format(props.row.updated_at) }}
+        </b-table-column>
+        <b-table-column field="created_at" label="Created At">
+          {{ format(props.row.created_at) }}
+        </b-table-column>
+      </template>
+    </b-table>
     <b-message
       v-if="connections.length == 0"
       title="No data yet"
@@ -85,7 +107,8 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 
-import { CONNECTION_TYPES } from '../constants'
+import { formatDatetime } from '../utils'
+import { CONNECTION_TYPES, INVALID_SELECTION_MESSAGE } from '../constants'
 
 export default {
   data() {
@@ -98,48 +121,24 @@ export default {
         connection_type: null,
         from_person_id: null,
         to_person_id: null,
-      },
-      columns: [
-        {
-          field: "connection_type",
-          label: "Connection Type"
-        },
-        {
-          field: "from_person_id",
-          label: "From"
-        },
-        {
-          field: "to_person_id",
-          label: "To"
-        },
-        {
-          field: "email",
-          label: "Email"
-        },
-        {
-          field: "updated_at",
-          label: "Updated At"
-        },
-        {
-          field: "created_at",
-          label: "Created At"
-        }
-      ]
+      }
     };
   },
   watch: {
     selectedConnection: function(val) {
       if (val != null) {
         this.isEditing = true
-        this.connection = this.connections.find(i => i.id == val.id)
+        this.connection = { ...this.connections.find(i => i.id == val.id) }
         this.selectedConnectionId = val.id
       }
     }
   },
-  computed: mapState({
-    persons: 'persons',
-    connections: 'connections',
-  }),
+  computed: {
+    ...mapState({
+      persons: 'persons',
+      connections: 'connections',
+    }),
+  },
   mounted() {
     this.$nextTick(() => {
       this.loadConnections()
@@ -147,30 +146,32 @@ export default {
   },
   methods: {
     ...mapActions([
-      "loadConnections",
-      "addConnection",
-      "updateConnectionType",
+      'loadConnections',
+      'addConnection',
+      'updateConnectionType',
     ]),
+    format(strDate) {
+      return formatDatetime(strDate)
+    },
     // Yeah-yeah, DRY, right?
     // Let's assume in a general case
     // these guys should be different
     // (not just messages)
     success() {
       this.$buefy.toast.open({
-        message: "Sucessfully sent!",
-        type: "is-success"
+        message: 'Sucessfully sent!',
+        type: 'is-success'
       });
     },
     validationError() {
       this.$buefy.toast.open({
         duration: 3000,
-        message: `Please, make sure you chose values for all fields`,
-        position: "is-bottom",
-        type: "is-danger"
+        message: INVALID_SELECTION_MESSAGE,
+        position: 'is-bottom',
+        type: 'is-danger'
       });
     },
     isValid() {
-      console.log(this.connection)
       return (
         this.connection.connection_type &&
         this.connection.from_person_id &&
@@ -192,13 +193,14 @@ export default {
         this.success()
         this.updateConnectionType({
           id: this.selectedConnectionId,
-          connectionType: this.connectionTypes
+          connectionType: this.connection.connection_type
         })
       } else {
         this.validationError()
       }
     },
     reset() {
+      this.connection = {}
       this.selectedConnection = null
       this.selectedConnectionId = -1
       this.isEditing = false
